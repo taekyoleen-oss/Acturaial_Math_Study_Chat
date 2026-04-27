@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { isPdfConvertUiDisabled, PDF_CONVERT_DISABLED_MESSAGE } from '@/lib/pdf-convert-mode';
 import PdfUploader from '@/components/upload/PdfUploader';
 import PageRangeSelector from '@/components/upload/PageRangeSelector';
 import CategorySelector from '@/components/upload/CategorySelector';
@@ -125,71 +127,113 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Upload card */}
-      <div
-        className="rounded-2xl p-6 mb-4 fade-in"
-        style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          boxShadow: 'var(--shadow-md)',
-        }}
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <Upload size={17} style={{ color: 'var(--primary)' }} />
-          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-            PDF 업로드
-          </span>
-        </div>
-        <PdfUploader onFileSelect={setFile} selectedFile={file} />
-      </div>
-
-      {file && (
+      {isPdfConvertUiDisabled() ? (
         <div
-          className="rounded-2xl p-6 mb-4 space-y-5 fade-in"
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-        >
-          <CategorySelector value={category} onChange={setCategory} />
-          <PageRangeSelector value={targetPages} onChange={setTargetPages} />
-        </div>
-      )}
-
-      {error && (
-        <div
-          className="mb-4 p-4 rounded-xl text-sm flex items-center gap-2"
+          className="rounded-2xl p-6 mb-10 fade-in text-left"
           style={{
-            background: 'var(--error-light)',
-            color: 'var(--error)',
-            border: '1px solid rgba(239,68,68,0.25)',
+            background: 'var(--cyan-light)',
+            border: '1px solid rgba(34,211,238,0.35)',
+            boxShadow: 'var(--shadow-md)',
           }}
         >
-          <span>⚠</span>
-          {error}
+          <p className="font-bold text-sm mb-2" style={{ color: 'var(--cyan)' }}>배포 환경 안내</p>
+          <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--text-primary)' }}>
+            {PDF_CONVERT_DISABLED_MESSAGE}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/study"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
+              style={{ background: 'var(--gradient-primary)', color: '#fff' }}
+            >
+              학습 허브
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              href="/history"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
+              style={{ background: 'var(--surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+            >
+              변환 이력
+            </Link>
+            <Link
+              href="/exam"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm"
+              style={{ background: 'var(--accent-light)', color: 'var(--accent)', border: '1px solid rgba(167,139,250,0.25)' }}
+            >
+              시험 문제
+            </Link>
+          </div>
         </div>
-      )}
+      ) : (
+        <>
+          {/* Upload card */}
+          <div
+            className="rounded-2xl p-6 mb-4 fade-in"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--shadow-md)',
+            }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Upload size={17} style={{ color: 'var(--primary)' }} />
+              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                PDF 업로드
+              </span>
+            </div>
+            <PdfUploader onFileSelect={setFile} selectedFile={file} />
+          </div>
 
-      <button
-        onClick={handleStart}
-        disabled={!file || uploading}
-        className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 mb-10 disabled:opacity-40"
-        style={{
-          background: file && !uploading ? 'var(--gradient-primary)' : 'var(--surface-2)',
-          color: '#fff',
-          boxShadow: file && !uploading ? 'var(--shadow-glow)' : 'none',
-          border: '1px solid transparent',
-        }}
-      >
-        {uploading ? (
-          <>
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            업로드 중...
-          </>
-        ) : (
-          <>
-            변환 시작
-            <ArrowRight size={18} />
-          </>
-        )}
-      </button>
+          {file && (
+            <div
+              className="rounded-2xl p-6 mb-4 space-y-5 fade-in"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+            >
+              <CategorySelector value={category} onChange={setCategory} />
+              <PageRangeSelector value={targetPages} onChange={setTargetPages} />
+            </div>
+          )}
+
+          {error && (
+            <div
+              className="mb-4 p-4 rounded-xl text-sm flex items-center gap-2"
+              style={{
+                background: 'var(--error-light)',
+                color: 'var(--error)',
+                border: '1px solid rgba(239,68,68,0.25)',
+              }}
+            >
+              <span>⚠</span>
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleStart}
+            disabled={!file || uploading}
+            className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 mb-10 disabled:opacity-40"
+            style={{
+              background: file && !uploading ? 'var(--gradient-primary)' : 'var(--surface-2)',
+              color: '#fff',
+              boxShadow: file && !uploading ? 'var(--shadow-glow)' : 'none',
+              border: '1px solid transparent',
+            }}
+          >
+            {uploading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                업로드 중...
+              </>
+            ) : (
+              <>
+                변환 시작
+                <ArrowRight size={18} />
+              </>
+            )}
+          </button>
+        </>
+      )}
 
       {/* Feature grid */}
       <div className="grid grid-cols-2 gap-3 mb-4">

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { validatePdfFile } from '@/lib/utils/file-validation';
+import { isPdfConvertServerDisabled, PDF_CONVERT_DISABLED_MESSAGE } from '@/lib/pdf-convert-mode';
 import { spawnSync } from 'child_process';
 
 function getPdfPageCount(buffer: Buffer): number {
@@ -15,6 +16,9 @@ function getPdfPageCount(buffer: Buffer): number {
 
 export async function POST(request: NextRequest) {
   try {
+    if (isPdfConvertServerDisabled()) {
+      return Response.json({ error: PDF_CONVERT_DISABLED_MESSAGE }, { status: 403 });
+    }
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     if (!file) return Response.json({ error: '파일이 없습니다' }, { status: 400 });

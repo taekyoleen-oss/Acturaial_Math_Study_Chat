@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { isPdfConvertServerDisabled, PDF_CONVERT_DISABLED_MESSAGE } from '@/lib/pdf-convert-mode';
 import { buildDocx } from '@/lib/converters/blocks-to-docx';
 import { uploadFile, deleteFolder } from '@/lib/utils/signed-url';
 import type { Database } from '@/types/supabase';
@@ -8,6 +9,9 @@ type ConvJob = Database['public']['Tables']['conv_jobs']['Row'];
 
 export async function POST(request: NextRequest) {
   try {
+    if (isPdfConvertServerDisabled()) {
+      return Response.json({ error: PDF_CONVERT_DISABLED_MESSAGE }, { status: 403 });
+    }
     const { jobId } = await request.json();
     if (!jobId) return Response.json({ error: 'jobId 필요' }, { status: 400 });
 

@@ -1,11 +1,15 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
+import { isPdfConvertServerDisabled, PDF_CONVERT_DISABLED_MESSAGE } from '@/lib/pdf-convert-mode';
 
 const schema = z.object({ jobId: z.string().uuid(), targetPages: z.array(z.number().int().positive()).optional() });
 
 export async function POST(request: NextRequest) {
   try {
+    if (isPdfConvertServerDisabled()) {
+      return Response.json({ error: PDF_CONVERT_DISABLED_MESSAGE }, { status: 403 });
+    }
     const parsed = schema.safeParse(await request.json());
     if (!parsed.success) return Response.json({ error: '잘못된 요청' }, { status: 400 });
     const { jobId, targetPages } = parsed.data;

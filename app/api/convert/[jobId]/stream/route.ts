@@ -1,17 +1,25 @@
 import { NextRequest } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { isPdfConvertServerDisabled, PDF_CONVERT_DISABLED_MESSAGE } from '@/lib/pdf-convert-mode';
 import { convertPdfToImages, getPdfPageCount } from '@/lib/converters/pdf-to-images';
 import { parsePageWithVision } from '@/lib/claude/vision-parser';
 import { findFailedBlockIndices } from '@/lib/converters/katex-validate';
 import { reparseBlocks } from '@/lib/claude/reparser';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 600;
+/** Vercel Hobby: 1–300s. Pro 이상에서 더 길게 필요하면 값 조정. */
+export const maxDuration = 300;
 
 const sse = (d: object) => `data: ${JSON.stringify(d)}\n\n`;
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ jobId: string }> }) {
   const { jobId } = await params;
+  if (isPdfConvertServerDisabled()) {
+    const payload = JSON.stringify({ type: 'error', message: PDF_CONVERT_DISABLED_MESSAGE });
+    return new Response(`data: ${payload}\n\n`, {
+      headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' },
+    });
+  }
   const supabase = createServerClient();
   const enc = new TextEncoder();
 
